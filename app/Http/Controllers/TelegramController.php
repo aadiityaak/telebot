@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\RequestLog;
 
+use Inertia\Inertia;
+
 class TelegramController extends Controller
 {
     protected string $botToken;
@@ -42,8 +44,14 @@ class TelegramController extends Controller
     /**
      * Endpoint untuk melihat log terakhir (sementara).
      */
-    public function log()
+    public function logRequest()
     {
-        return RequestLog::orderByDesc('created_at')->limit(100)->get();
+        // Ambil data log dari database
+        $logs = RequestLog::orderBy('created_at', 'desc')->get();
+
+        // Pastikan mengirim array, bukan Collection
+        return Inertia::render('RequestLog', [
+            'data_logs' => $logs->toArray(),
+        ]);
     }
 }

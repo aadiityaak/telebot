@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\TelegramController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -11,5 +12,9 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+Route::get('logs', [TelegramController::class, 'logRequest'])
+    ->middleware(['auth', 'verified'])
+    ->name('logs');
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
