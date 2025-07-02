@@ -121,8 +121,8 @@ const deleteIp = (id: number) => {
                                 </span>
                             </td>
                             <td class="p-3">
-                                <button @click="deleteIp(ip.id)" class="flex text-xs text-white gap-2 items-center btn bg-red-700 px-2 py-1 rounded cursor-pointer">
-                                  <Trash class="w-4 h-4" /> Hapus
+                                <button @click="deleteIp(ip.id)" class="flex text-xs text-white gap-2 items-center btn bg-red-600 px-2 py-1 rounded cursor-pointer">
+                                  <Trash class="w-3 h-3" /> Hapus
                                 </button>
                             </td>
                         </tr>
