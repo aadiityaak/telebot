@@ -54,7 +54,7 @@ class TelegramController extends Controller
             ->paginate(10)
             ->appends($request->all());
 
-        return Inertia::render('RequestLog', [
+        return Inertia::render('RequestLog/Index', [
             'logs' => $logs,
             'sort' => $sort,
             'order' => $order,

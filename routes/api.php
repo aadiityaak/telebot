@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Middleware\indexMiddleware;
+use App\Http\Middleware\LogRequestMiddleware;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TelegramController;
 
-Route::middleware([indexMiddleware::class])->group(function () {
+Route::middleware([LogRequestMiddleware::class])->group(function () {
   Route::post('/telegram/send', [TelegramController::class, 'send']);
 });

@@ -3,9 +3,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { ref } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import BaseModal from '@/components/BaseModal.vue';
+import { Plus, Trash } from 'lucide-vue-next';
 
 const page = usePage();
-const blockedIps = ref(page.props.blocked_ips.data);
+const blockedIps = ref([...page.props.blocked_ips.data]); // penting: spread agar reactive
 
 const form = useForm({
     ip_address: '',
@@ -14,26 +15,52 @@ const form = useForm({
 
 const showAddModal = ref(false);
 
+// ✅ Tambah IP
 const submit = () => {
     form.post(route('blocked-ips.store'), {
         preserveScroll: true,
-        onSuccess: () => {
+        onSuccess: (page) => {
+            // ambil IP baru dari response inertia flash/message atau fetch ulang dari backend (lebih clean: dari backend)
+            // tapi sementara ini kita "anggap" IP baru paling akhir
+            blockedIps.value.unshift({
+                id: Date.now(), // opsional, idealnya backend balikin ID
+                ip_address: form.ip_address,
+                reason: form.reason,
+                is_active: true,
+                created_at: new Date().toISOString(),
+            });
             form.reset();
             showAddModal.value = false;
         },
     });
 };
 
+// ✅ Update status block
 const updateStatus = (ip: any) => {
-    router.put(route('blocked-ips.update', ip.id), {
-        reason: ip.reason,
-        is_active: !ip.is_active,
-    });
+    router.put(
+        route('blocked-ips.update', ip.id),
+        {
+            reason: ip.reason,
+            is_active: !ip.is_active,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                ip.is_active = !ip.is_active;
+            },
+        }
+    );
 };
 
+// ✅ Hapus IP dari list
 const deleteIp = (id: number) => {
     if (confirm('Hapus IP ini?')) {
-        router.delete(route('blocked-ips.destroy', id));
+        router.delete(route('blocked-ips.destroy', id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                blockedIps.value = blockedIps.value.filter((ip) => ip.id !== id);
+            },
+        });
     }
 };
 </script>
@@ -43,7 +70,10 @@ const deleteIp = (id: number) => {
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
                 <h1 class="text-2xl font-semibold">Blocked IP</h1>
-                <button class="btn btn-primary" @click="showAddModal = true">Tambah IP</button>
+                <button class="btn bg-green-700 px-2 py-1 rounded cursor-pointer flex items-center gap-2 text-white" @click="showAddModal = true">
+                  <Plus class="w-4 h-4" />
+                  Tambah IP
+                </button>
             </div>
 
             <BaseModal :open="showAddModal" @close="showAddModal = false">
@@ -78,7 +108,7 @@ const deleteIp = (id: number) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="ip in blockedIps" :key="ip.id" class="border-t hover:bg-gray-50">
+                        <tr v-for="ip in blockedIps" :key="ip.id" class="border-t hover:bg-gray-100 dark:hover:bg-gray-700">
                             <td class="p-3 font-mono">{{ ip.ip_address }}</td>
                             <td class="p-3">{{ ip.reason }}</td>
                             <td class="p-3">
@@ -91,7 +121,9 @@ const deleteIp = (id: number) => {
                                 </span>
                             </td>
                             <td class="p-3">
-                                <button @click="deleteIp(ip.id)" class="text-red-600 hover:underline">Hapus</button>
+                                <button @click="deleteIp(ip.id)" class="flex text-xs text-white gap-2 items-center btn bg-red-700 px-2 py-1 rounded cursor-pointer">
+                                  <Trash class="w-4 h-4" /> Hapus
+                                </button>
                             </td>
                         </tr>
                     </tbody>
