@@ -6,8 +6,8 @@ import { ref, computed } from 'vue';
 import BaseModal from '@/components/BaseModal.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Request Log', href: '/log-request' },
+    { title: 'Dashboard', href: '/logs' },
+    { title: 'Request Log', href: '/logs' },
 ];
 
 interface LogItem {

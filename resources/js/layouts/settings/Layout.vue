@@ -18,6 +18,10 @@ const sidebarNavItems: NavItem[] = [
         title: 'Appearance',
         href: '/settings/appearance',
     },
+    {
+        title: 'Telegram',
+        href: '/settings/telegram',
+    },
 ];
 
 const page = usePage();
