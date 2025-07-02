@@ -27,13 +27,13 @@ const pageProps = usePage().props;
 const showDialog = ref(false);
 const selectedLog = ref<LogItem | null>(null);
 
-const logs = computed(() => pageProps.logs.data ?? []);
-const sort = ref(pageProps.sort ?? 'created_at');
-const order = ref(pageProps.order ?? 'desc');
-
-const perPage = computed(() => pageProps.logs.per_page ?? 10);
-const currentPage = computed(() => pageProps.logs.current_page ?? 1);
-const totalPages = computed(() => pageProps.logs.last_page ?? 1);
+// Gunakan computed agar reactive terhadap perubahan props dari Inertia
+const logs = computed(() => usePage().props.logs.data ?? []);
+const sort = computed(() => usePage().props.sort ?? 'created_at');
+const order = computed(() => usePage().props.order ?? 'desc');
+const perPage = computed(() => usePage().props.logs.per_page ?? 10);
+const currentPage = computed(() => usePage().props.logs.current_page ?? 1);
+const totalPages = computed(() => usePage().props.logs.last_page ?? 1);
 
 const handleSort = (field: string) => {
     let newOrder = 'asc';
@@ -43,15 +43,16 @@ const handleSort = (field: string) => {
     router.get(
         route('logs'),
         { page: currentPage.value, sort: field, order: newOrder },
-        { preserveState: true, preserveScroll: true }
+        { preserveState: true, preserveScroll: true, only: ['logs', 'sort', 'order'] }
     );
 };
 
 const goToPage = (page: number) => {
+    if (page < 1 || page > totalPages.value) return;
     router.get(
         route('logs'),
         { page, sort: sort.value, order: order.value },
-        { preserveState: true, preserveScroll: true }
+        { preserveState: true, preserveScroll: true, only: ['logs', 'sort', 'order'] }
     );
 };
 
