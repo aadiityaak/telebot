@@ -19,8 +19,12 @@ const sidebarNavItems: NavItem[] = [
         href: '/settings/appearance',
     },
     {
-        title: 'Telegram',
+        title: 'Telegram Token',
         href: '/settings/telegram',
+    },
+    {
+        title: 'API Key',
+        href: '/settings/api-key',
     },
 ];
 

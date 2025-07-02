@@ -7,21 +7,21 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\RequestLog;
 use App\Models\BlockedIp;
+use App\Models\Setting;
 
 class LogRequestMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
+        $start = microtime(true);
 
-        // ✅ Tolak request jika IP diblokir
+        // ✅ Cek IP terblokir
         if (BlockedIp::where('ip_address', $ip)->where('is_active', true)->exists()) {
-            // simpan juga di log
+            $duration = (int) ((microtime(true) - $start) * 1000);
+            $status = 403;
+            $body = ['message' => 'Your IP address is blocked.'];
+
             RequestLog::create([
                 'ip_address'    => $ip,
                 'user_agent'    => $request->userAgent(),
@@ -29,19 +29,39 @@ class LogRequestMiddleware
                 'endpoint'      => $request->path(),
                 'payload'       => $request->all(),
                 'headers'       => $request->headers->all(),
-                'status_code'   => 403,
-                'response_body' => [
-                    'message' => 'Your IP address is blocked.',
-                ],
-                'duration_ms'   => 0,
+                'status_code'   => $status,
+                'response_body' => $body,
+                'duration_ms'   => $duration,
             ]);
-            return response()->json([
-                'message' => 'Your IP address is blocked.',
-            ], 403); // HTTP 403 Forbidden
+
+            return response()->json($body, $status);
         }
 
-        $start = microtime(true);
+        // ✅ Validasi API Key via query param
+        $clientKey = $request->query('api_key');
+        $validKey = Setting::getValue('app_api_key');
 
+        if (!$clientKey || $clientKey !== $validKey) {
+            $duration = (int) ((microtime(true) - $start) * 1000);
+            $status = 401;
+            $body = ['message' => 'Unauthorized - Invalid API Key'];
+
+            RequestLog::create([
+                'ip_address'    => $ip,
+                'user_agent'    => $request->userAgent(),
+                'method'        => $request->method(),
+                'endpoint'      => $request->path(),
+                'payload'       => $request->all(),
+                'headers'       => $request->headers->all(),
+                'status_code'   => $status,
+                'response_body' => $body,
+                'duration_ms'   => $duration,
+            ]);
+
+            return response()->json($body, $status);
+        }
+
+        // ✅ Lanjutkan request jika lolos semua validasi
         $response = $next($request);
 
         $duration = (int) ((microtime(true) - $start) * 1000);

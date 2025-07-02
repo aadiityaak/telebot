@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\BlockedIpController;
 use App\Http\Controllers\Settings\TelegramSettingController;
+use App\Http\Controllers\Settings\ApiKeyController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -28,6 +29,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('settings')->group(function () {
     Route::get('/telegram', [TelegramSettingController::class, 'edit'])->name('settings.telegram');
     Route::post('/telegram', [TelegramSettingController::class, 'update'])->name('settings.telegram.update');
+});
+
+Route::middleware(['auth'])->prefix('settings')->group(function () {
+    Route::get('/api-key', [ApiKeyController::class, 'index'])->name('settings.api-key');
+    Route::post('/api-key/generate', [ApiKeyController::class, 'regenerate'])->name('settings.api-key.generate');
 });
 
 require __DIR__ . '/settings.php';
