@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\BlockedIpController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
