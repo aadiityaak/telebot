@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\RequestLog;
+use App\Models\Setting;
+
 
 use Inertia\Inertia;
 
@@ -14,8 +16,7 @@ class TelegramController extends Controller
 
     public function __construct()
     {
-        // Idealnya ini diambil dari .env atau config
-        $this->botToken = config('services.telegram.bot_token', env('TELEGRAM_BOT_TOKEN'));
+        $this->botToken = Setting::where('key', 'telegram_token')->value('value');
     }
 
     /**
@@ -26,6 +27,7 @@ class TelegramController extends Controller
         $request->validate([
             'chat_id' => 'required|string',
             'text'    => 'required|string',
+            'parse_mode' => 'nullable|string',
         ]);
 
         $url = "https://api.telegram.org/bot{$this->botToken}/sendMessage";
@@ -33,6 +35,7 @@ class TelegramController extends Controller
         $response = Http::post($url, [
             'chat_id' => $request->input('chat_id'),
             'text'    => $request->input('text'),
+            'parse_mode' => $request->input('parse_mode') ?? 'HTML',
         ]);
 
         return response()->json([

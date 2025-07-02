@@ -21,6 +21,20 @@ class LogRequestMiddleware
 
         // ✅ Tolak request jika IP diblokir
         if (BlockedIp::where('ip_address', $ip)->where('is_active', true)->exists()) {
+            // simpan juga di log
+            RequestLog::create([
+                'ip_address'    => $ip,
+                'user_agent'    => $request->userAgent(),
+                'method'        => $request->method(),
+                'endpoint'      => $request->path(),
+                'payload'       => $request->all(),
+                'headers'       => $request->headers->all(),
+                'status_code'   => 403,
+                'response_body' => [
+                    'message' => 'Your IP address is blocked.',
+                ],
+                'duration_ms'   => 0,
+            ]);
             return response()->json([
                 'message' => 'Your IP address is blocked.',
             ], 403); // HTTP 403 Forbidden
