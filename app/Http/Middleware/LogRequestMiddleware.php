@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\RequestLog;
 
-class LogRequestMiddleware
+class indexMiddleware
 {
     /**
      * Handle an incoming request.

@@ -44,14 +44,20 @@ class TelegramController extends Controller
     /**
      * Endpoint untuk melihat log terakhir (sementara).
      */
-    public function logRequest()
+    public function index(Request $request)
     {
-        // Ambil data log dari database
-        $logs = RequestLog::orderBy('created_at', 'desc')->get();
+        $allowedSorts = ['id', 'ip_address', 'method', 'endpoint', 'status_code', 'duration_ms', 'created_at'];
+        $sort = in_array($request->get('sort'), $allowedSorts) ? $request->get('sort') : 'created_at';
+        $order = in_array($request->get('order'), ['asc', 'desc']) ? $request->get('order') : 'desc';
 
-        // Pastikan mengirim array, bukan Collection
+        $logs = RequestLog::orderBy($sort, $order)
+            ->paginate(10)
+            ->appends($request->all());
+
         return Inertia::render('RequestLog', [
-            'data_logs' => $logs->toArray(),
+            'logs' => $logs,
+            'sort' => $sort,
+            'order' => $order,
         ]);
     }
 }

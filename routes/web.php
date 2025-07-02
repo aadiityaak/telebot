@@ -12,7 +12,7 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('logs', [TelegramController::class, 'logRequest'])
+Route::get('logs', [TelegramController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('logs');
 
